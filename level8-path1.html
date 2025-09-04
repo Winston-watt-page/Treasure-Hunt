@@ -61,7 +61,7 @@
     }
     .next-button:hover { background: #0ea5e9; transform: scale(1.05); }
 
-    /* 🎉 Popup Modal - Blue Theme */
+    /* 🎉 Popup Modal */
     .popup {
       display: none;
       position: fixed;
@@ -151,10 +151,10 @@
         optionsDiv.appendChild(div);
       });
 
-      document.getElementById('result').style.display = 'none';
+      const result = document.getElementById('result');
+      result.style.display = 'none';
       const nextBtn = document.getElementById('nextButton');
       nextBtn.style.display = 'none';
-      nextBtn.onclick = nextQuestion;
     }
 
     function selectAnswer(i) {
@@ -168,10 +168,10 @@
         result.textContent = "✅ Correct!";
 
         if(currentLevel === mainQuestions.length - 1){
+          // Last question → show final clue
           document.getElementById('congratsPopup').style.display = 'flex';
           nextBtn.style.display = 'none';
         } else {
-          currentLevel++;
           nextBtn.textContent = "Next Question";
           nextBtn.onclick = nextQuestion;
           nextBtn.style.display = 'block';
@@ -234,7 +234,7 @@
       document.getElementById('congratsPopup').style.display = 'none';
     }
 
-    // Start the quiz
+    // Initialize quiz
     loadQuestion();
   </script>
 </body>
