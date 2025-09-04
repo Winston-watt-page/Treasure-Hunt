@@ -135,8 +135,7 @@
 
     function loadQuestion() {
       if(currentLevel >= mainQuestions.length){
-        document.getElementById('congratsPopup').style.display = 'flex';
-        return;
+        return; // Do not auto-show popup here
       }
 
       const q = mainQuestions[currentLevel];
@@ -169,17 +168,26 @@
       if(i === q.correct){
         result.className = 'result correct';
         result.textContent = "✅ Correct!";
-        currentLevel++;
-        nextBtn.textContent = "Next Question";
-        nextBtn.onclick = nextQuestion;
+
+        if(currentLevel === mainQuestions.length - 1){
+          // Last question answered correctly → show final clue popup
+          document.getElementById('congratsPopup').style.display = 'flex';
+          nextBtn.style.display = 'none';
+        } else {
+          currentLevel++;
+          nextBtn.textContent = "Next Question";
+          nextBtn.onclick = nextQuestion;
+          nextBtn.style.display = 'block';
+        }
+
       } else {
         result.className = 'result wrong';
         result.textContent = "❌ Wrong answer! Try a bonus question.";
         nextBtn.textContent = "Bonus Question";
         nextBtn.onclick = loadBonusQuestion;
+        nextBtn.style.display = 'block';
       }
       result.style.display = 'block';
-      nextBtn.style.display = 'block';
     }
 
     function loadBonusQuestion(){
@@ -224,6 +232,7 @@
     }
 
     function nextQuestion(){
+      currentLevel++;
       loadQuestion();
     }
 
