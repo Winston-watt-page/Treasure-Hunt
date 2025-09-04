@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Round 3 - Choose Your Path</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #0d1117;
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+      color: #38bdf8;
+      font-size: clamp(24px, 6vw, 32px);
+    }
+
+    .path-selection {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .path-button {
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 10px;
+      padding: 30px 40px;
+      cursor: pointer;
+      color: white;
+      font-size: clamp(16px, 4vw, 20px);
+      transition: all 0.3s ease;
+      min-width: 200px;
+    }
+
+    .path-button:hover {
+      background: #38bdf8;
+      color: black;
+    }
+
+    .direction-display {
+      display: none;
+      margin-top: 40px;
+      background: rgba(56,189,248,0.1);
+      border: 2px solid #38bdf8;
+      border-radius: 10px;
+      padding: 40px;
+      max-width: 500px;
+    }
+
+    .direction-display.show {
+      display: block;
+    }
+
+    .direction-text {
+      font-size: clamp(18px, 5vw, 24px);
+      line-height: 1.5;
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .path-selection {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Choose Your Path</h1>
+  
+  <div class="path-selection" id="pathSelection">
+    <div class="path-button" onclick="selectPath(1)">
+      Path 1
+    </div>
+    <div class="path-button" onclick="selectPath(2)">
+      Path 2
+    </div>
+  </div>
+
+  <div class="direction-display" id="directionDisplay">
+    <div class="direction-text" id="directionText"></div>
+  </div>
+
+  <script>
+    // Disable right-click and dev tools
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', function(e) {
+      if (e.keyCode == 123 || 
+          (e.ctrlKey && e.shiftKey && e.keyCode == 73) || 
+          (e.ctrlKey && e.shiftKey && e.keyCode == 74) || 
+          (e.ctrlKey && e.keyCode == 85)) {
+        e.preventDefault();
+      }
+    });
+
+    let pathSelected = false;
+
+    function selectPath(pathNumber) {
+      if (pathSelected) return;
+      
+      pathSelected = true;
+      
+      const pathSelection = document.getElementById('pathSelection');
+      const directionDisplay = document.getElementById('directionDisplay');
+      const directionText = document.getElementById('directionText');
+
+      // Hide path selection buttons
+      pathSelection.style.display = 'none';
+
+      // Show direction based on selection
+      if (pathNumber === 1) {
+        directionText.textContent = 'Go straight, then turn right to reach supervisor';
+      } else {
+        directionText.textContent = 'Turn right, then go straight to reach supervisor';
+      }
+
+      directionDisplay.classList.add('show');
+    }
+  </script>
+</body>
+</html>

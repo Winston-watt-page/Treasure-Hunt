@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Round 5 - Tango Puzzle</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #1e293b;
+      --text: #ffffff;
+      --primary: #38bdf8;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 760px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      color: var(--primary);
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+
+    .sub {
+      margin: 0 0 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .status {
+      min-height: 1.75em;
+      text-align: center;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      position: relative;
+      /* Corrected Styles */
+      min-height: 130px;
+      padding: 18px 12px;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text); /* Added: Set text color to white */
+      /* Original Styles */
+      border: 2px solid var(--primary);
+      border-radius: 14px;
+      background: var(--panel);
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+      will-change: transform;
+    }
+    .card:hover { transform: translateY(-2px); }
+    .card.is-flipped {
+      background: var(--primary);
+      color: #0d1117;
+      cursor: default;
+    }
+    .card.is-matched {
+      background: var(--success);
+      color: #0d1117;
+      border-color: var(--success);
+      cursor: default;
+      transform: none;
+    }
+    .card.is-incorrect { border-color: var(--danger); }
+
+    .topbar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 18px 0 22px;
+    }
+    .btn {
+      appearance: none;
+      border: 2px solid var(--primary);
+      background: transparent;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .12s ease, background-color .12s ease, border-color .12s ease, opacity .12s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: var(--primary); color: #0d1117; }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      display: none; /* hidden by default */
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 50;
+    }
+    .modal.show { display: flex; }
+
+    .modal-card {
+      background: var(--panel);
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px 24px;
+      text-align: center;
+      animation: fadeIn .24s ease;
+    }
+
+    .modal-card h2 { margin: 0 0 10px; font-size: 1.8rem; }
+    .modal-card p { margin: 0 0 18px; font-size: 1.05rem; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 480px) {
+      .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card {
+        min-height: 110px;
+        font-size: 0.95rem;
+        padding: 14px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tango Puzzle</h1>
+    <p class="sub">Match each question with its correct answer.</p>
+
+    <div class="topbar">
+      <button id="restartBtn" class="btn">Restart</button>
+      <button id="shuffleBtn" class="btn">Shuffle</button>
+    </div>
+
+    <div id="status" class="status" aria-live="polite">Click a card to start!</div>
+    <div id="board" class="board" role="grid" aria-label="Matching cards board"></div>
+  </div>
+
+  <div id="resultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+    <div class="modal-card">
+      <h2 id="modalTitle">🎉 Congratulations!</h2>
+      <p id="modalDesc">You have completed the puzzle.<br><br><strong>👉 Now go to LH26 Notice Board — Lecture Hall 26.</strong></p>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+        <button id="playAgainBtn" class="btn primary">Play Again</button>
+        <button id="closeModalBtn" class="btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PAIRS = [
+      { id: 1, q: "This is a social engineering attack.", a: "Phishing" },
+      { id: 2, q: "It is used for secure communication on the internet.", a: "HTTPS" },
+      { id: 3, q: "This is a programming language used for web development.", a: "JavaScript" },
+      { id: 4, q: "This is the brain of a computer.", a: "CPU" },
+    ];
+
+    const board = document.getElementById('board');
+    const statusText = document.getElementById('status');
+    const resultModal = document.getElementById('resultModal');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+
+    let first = null;
+    let second = null;
+    let lock = false;
+    let matches = 0;
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function makeDeck() {
+      const cards = [];
+      for (const p of PAIRS) {
+        cards.push({ id: cryptoRandom(), pairId: p.id, type: 'q', content: p.q });
+        cards.push({ id: cryptoRandom(), pairId: p.id, type: 'a', content: p.a });
+      }
+      return shuffle(cards);
+    }
+
+    function cryptoRandom() {
+      if (!('crypto' in window) || !('getRandomValues' in crypto)) {
+        return Math.random().toString(36).slice(2);
+      }
+      const bytes = new Uint8Array(8);
+      crypto.getRandomValues(bytes);
+      return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function renderBoard() {
+      const deck = makeDeck();
+      board.innerHTML = '';
+      matches = 0;
+      first = null; second = null; lock = false;
+      statusText.textContent = 'Click a card to start!';
+
+      for (const c of deck) {
+        const el = document.createElement('button');
+        el.className = 'card';
+        el.setAttribute('role', 'gridcell');
+        el.setAttribute('aria-pressed', 'false');
+        el.dataset.cardId = c.id;
+        el.dataset.pairId = String(c.pairId);
+        el.dataset.type = c.type;
+        el.textContent = c.content;
+        el.addEventListener('click', onFlip);
+        board.appendChild(el);
+      }
+    }
+
+    function onFlip(e) {
+      if (lock) return;
+      const el = e.currentTarget;
+      if (el.classList.contains('is-matched') || el === first) return;
+
+      el.classList.add('is-flipped');
+      el.setAttribute('aria-pressed', 'true');
+
+      if (!first) {
+        first = el;
+        statusText.textContent = `Flipped: ${first.textContent}`;
+        return;
+      }
+
+      second = el;
+      statusText.textContent = `Flipped: ${first.textContent} & ${second.textContent}`;
+      lock = true;
+
+      const isMatch = first.dataset.pairId === second.dataset.pairId && first.dataset.type !== second.dataset.type;
+      if (isMatch) {
+        markMatched();
+      } else {
+        markIncorrect();
+      }
+    }
+
+    function markMatched() {
+      first.classList.add('is-matched');
+      second.classList.add('is-matched');
+      first.removeEventListener('click', onFlip);
+      second.removeEventListener('click', onFlip);
+      statusText.textContent = '✅ Match found! Keep going…';
+      matches += 1;
+      resetPick();
+      checkWin();
+    }
+
+    function markIncorrect() {
+      first.classList.add('is-incorrect');
+      second.classList.add('is-incorrect');
+      statusText.textContent = '❌ No match. Try again!';
+      setTimeout(() => {
+        first.classList.remove('is-flipped', 'is-incorrect');
+        second.classList.remove('is-flipped', 'is-incorrect');
+        first.setAttribute('aria-pressed', 'false');
+        second.setAttribute('aria-pressed', 'false');
+        resetPick();
+      }, 900);
+    }
+
+    function resetPick() {
+      first = null;
+      second = null;
+      lock = false;
+    }
+
+    function checkWin() {
+      if (matches === PAIRS.length) {
+        statusText.textContent = '';
+        openModal();
+      }
+    }
+
+    function openModal() { resultModal.classList.add('show'); }
+    function closeModal() { resultModal.classList.remove('show'); }
+
+    playAgainBtn.addEventListener('click', () => { closeModal(); renderBoard(); });
+    closeModalBtn.addEventListener('click', closeModal);
+    restartBtn.addEventListener('click', renderBoard);
+    shuffleBtn.addEventListener('click', renderBoard);
+
+    resultModal.addEventListener('click', (e) => {
+      if (e.target === resultModal) closeModal();
+    });
+
+    renderBoard();
+  </script>
+</body>
+</html>

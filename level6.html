@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Follow the Path</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #0d1117;
+      font-family: Arial, sans-serif;
+      color: #38bdf8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+    }
+    h1 {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: clamp(18px, 5vw, 28px);
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56,189,248,0.8);
+      z-index: 10;
+    }
+    p {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: clamp(16px, 4vw, 22px);
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56,189,248,0.7);
+      z-index: 10;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <h1>➡ Follow the Path</h1>
+  <p>Follow the path and reach supervisor</p>
+
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script>
+    // Scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0d1117);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera.position.set(0, 2.5, 6);
+    camera.lookAt(0, 0, 0);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    // Lights
+    const light = new THREE.DirectionalLight(0xffffff, 1.2);
+    light.position.set(5, 10, 5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x66ccff, 0.5));
+
+    // Arrow material
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      metalness: 0.5,
+      roughness: 0.2,
+      emissive: 0x0088cc,
+      emissiveIntensity: 0.8
+    });
+
+    // Shaft
+    const shaftGeo = new THREE.CylinderGeometry(0.15, 0.15, 3, 32);
+    const shaft = new THREE.Mesh(shaftGeo, mat);
+    shaft.rotation.x = Math.PI / 2;
+    scene.add(shaft);
+
+    // Head
+    const headGeo = new THREE.ConeGeometry(0.45, 1.2, 32);
+    const head = new THREE.Mesh(headGeo, mat);
+    head.position.z = -2.3;
+    scene.add(head);
+
+    // Grid path
+    const grid = new THREE.GridHelper(20, 40, 0x38bdf8, 0x222222);
+    grid.material.opacity = 0.2;
+    grid.material.transparent = true;
+    scene.add(grid);
+
+    // Floating animation
+    let t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.02;
+      const floatY = Math.sin(t) * 0.2;
+      shaft.position.y = floatY;
+      head.position.y = floatY;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

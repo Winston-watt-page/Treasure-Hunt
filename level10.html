@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treasure Hunt Final Round</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+      user-drag: none;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #0d1117;
+      padding: 15px;
+      color: white;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      text-align: center;
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56,189,248,0.8);
+      font-size: clamp(18px, 5vw, 28px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      width: 90vw;
+      max-width: 600px;
+      aspect-ratio: 1 / 1;
+      gap: 8px;
+    }
+
+    .card {
+      position: relative;
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(56,189,248,0.4);
+      cursor: pointer;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    .card::before {
+      content: "";
+      display: block;
+      padding-top: 100%;
+    }
+    .card-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(16px, 5vw, 28px);
+      font-weight: bold;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      background: rgba(56,189,248,0.15);
+    }
+    .card.revealed .card-content {
+      color: black;
+      opacity: 1;
+      visibility: visible;
+    }
+    .card.revealed {
+      background: #38bdf8;
+    }
+    .matched {
+      background: white !important;
+      cursor: default;
+      box-shadow: 0 0 15px rgba(255,255,255,0.7);
+    }
+    .matched .card-content {
+      color: black !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 50;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px 24px;
+      text-align: center;
+      animation: fadeIn .24s ease;
+    }
+    .modal-card h2 { margin: 0 0 10px; font-size: 1.8rem; color: #38bdf8; }
+    .modal-card p { margin: 0 0 18px; font-size: 1.05rem; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .btn {
+      appearance: none;
+      border: 2px solid #38bdf8;
+      background: transparent;
+      color: white;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .12s ease, background-color .12s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: #38bdf8; color: #0d1117; }
+  </style>
+</head>
+<body>
+  <h2>Final Round 🧩 Memory Puzzle</h2>
+  <div class="grid" id="grid"></div>
+
+  <!-- Modal -->
+  <div id="resultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+    <div class="modal-card">
+      <h2 id="modalTitle">🎉 Congratulations!</h2>
+      <p id="modalDesc">You solved the final puzzle!<br><br><strong>👉 Please proceed to Lecture Hall 25 notice board🏆</strong></p>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+        <button id="playAgainBtn" class="btn primary">Play Again</button>
+        <button id="closeModalBtn" class="btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Disable right-click
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // Disable dev tools shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.keyCode == 123 || 
+          (e.ctrlKey && e.shiftKey && e.keyCode == 73) || 
+          (e.ctrlKey && e.shiftKey && e.keyCode == 74) || 
+          (e.ctrlKey && e.keyCode == 85)) {
+        e.preventDefault();
+      }
+    });
+
+    const emojis = [
+      "🍎","🍌","🍇","🍉","🍒","🍍","🥭","🍓",
+      "🐶","🐱","🐯","🦁","🐵","🐰","🐼","🐸",
+      "⚽","🏀"
+    ];
+    let cards = [...emojis, ...emojis];
+    cards.sort(() => 0.5 - Math.random());
+
+    const grid = document.getElementById("grid");
+    const resultModal = document.getElementById("resultModal");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    let firstCard = null;
+    let lock = false;
+    let matchedCount = 0;
+
+    function openModal() { resultModal.classList.add("show"); }
+    function closeModal() { resultModal.classList.remove("show"); }
+
+    playAgainBtn.addEventListener("click", () => { closeModal(); location.reload(); });
+    closeModalBtn.addEventListener("click", closeModal);
+
+    resultModal.addEventListener("click", (e) => {
+      if (e.target === resultModal) closeModal();
+    });
+
+    cards.forEach((emoji, index) => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.dataset.emoji = emoji;
+
+      const content = document.createElement("div");
+      content.classList.add("card-content");
+      content.textContent = emoji;
+      card.appendChild(content);
+
+      card.addEventListener("click", () => {
+        if (lock || card.classList.contains("matched") || card.classList.contains("revealed")) return;
+
+        card.classList.add("revealed");
+
+        if (!firstCard) {
+          firstCard = card;
+        } else {
+          if (firstCard.dataset.emoji === card.dataset.emoji) {
+            firstCard.classList.add("matched");
+            card.classList.add("matched");
+            firstCard = null;
+            matchedCount += 2;
+
+            if (matchedCount === cards.length) {
+              setTimeout(openModal, 400);
+            }
+          } else {
+            lock = true;
+            setTimeout(() => {
+              firstCard.classList.remove("revealed");
+              card.classList.remove("revealed");
+              firstCard = null;
+              lock = false;
+            }, 700);
+          }
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>

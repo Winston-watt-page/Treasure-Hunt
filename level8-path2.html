@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Round 4 - MCQ Puzzle</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+      user-drag: none;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .level-indicator {
+      background: rgba(56,189,248,0.1);
+      border: 1px solid #38bdf8;
+      border-radius: 20px;
+      padding: 8px 16px;
+      margin-bottom: 20px;
+      font-size: clamp(12px, 3vw, 14px);
+      color: #38bdf8;
+    }
+    h2 {
+      font-size: clamp(16px, 4vw, 20px);
+      margin-bottom: 20px;
+      line-height: 1.4;
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56,189,248,0.8);
+    }
+    .option {
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 8px 0;
+      width: 100%;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: clamp(14px, 4vw, 16px);
+      color: white;
+      box-shadow: 0 0 10px rgba(56,189,248,0.4);
+      word-wrap: break-word;
+    }
+    .option:hover {
+      background: rgba(56,189,248,0.2);
+      transform: scale(1.02);
+    }
+    .option.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: clamp(14px, 4vw, 18px);
+      font-weight: bold;
+      display: none;
+    }
+    .correct {
+      background: rgba(34,197,94,0.2);
+      border: 2px solid #22c55e;
+      color: #22c55e;
+    }
+    .wrong {
+      background: rgba(239,68,68,0.2);
+      border: 2px solid #ef4444;
+      color: #ef4444;
+    }
+    .next-button {
+      background: #38bdf8;
+      color: black;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: clamp(14px, 4vw, 16px);
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: 0.3s;
+    }
+    .next-button:hover {
+      background: #0ea5e9;
+      transform: scale(1.05);
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 50;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px 24px;
+      text-align: center;
+      animation: fadeIn .24s ease;
+    }
+    .modal-card h2 { margin: 0 0 10px; font-size: 1.8rem; color: #38bdf8; }
+    .modal-card p { margin: 0 0 18px; font-size: 1.05rem; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .btn {
+      appearance: none;
+      border: 2px solid #38bdf8;
+      background: transparent;
+      color: white;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .12s ease, background-color .12s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: #38bdf8; color: #0d1117; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="level-indicator" id="levelIndicator">Round 4 - Question 1 of 4</div>
+    <h2 id="question"></h2>
+    <div id="options"></div>
+    <div class="result" id="result"></div>
+    <button class="next-button" id="nextButton" onclick="nextQuestion()" style="display: none;">Next Question</button>
+  </div>
+
+  <!-- Modal -->
+  <div id="resultModal" class="modal">
+    <div class="modal-card">
+      <h2>🎉 Congratulations!</h2>
+      <p>Final Clue: Go to lift or elevator and find the QR code! 🛗</p>
+      <button id="closeModalBtn" class="btn primary">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Disable right-click and dev tools
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', function(e) {
+      if (e.keyCode == 123 || 
+          (e.ctrlKey && e.shiftKey && e.keyCode == 73) || 
+          (e.ctrlKey && e.shiftKey && e.keyCode == 74) || 
+          (e.ctrlKey && e.keyCode == 85)) {
+        e.preventDefault();
+      }
+    });
+
+    // Disable text selection and copying
+    document.onselectstart = function() { return false; };
+    document.onmousedown = function() { return false; };
+    document.addEventListener('copy', function(e) {
+      e.clipboardData.setData('text/plain', '');
+      e.preventDefault();
+    });
+
+    let currentLevel = 0;
+    let questionsAnswered = 0;
+
+    const mainQuestions = [
+      {
+        question: "Which device is used to connect multiple computers in a network?",
+        options: ["A) Monitor", "B) Router", "C) Keyboard", "D) Speaker"],
+        correct: 1
+      },
+      {
+        question: "What does 'URL' stand for?",
+        options: ["A) Universal Resource Locator", "B) Uniform Resource Locator", "C) United Resource Link", "D) Universal Resource Link"],
+        correct: 1
+      },
+      {
+        question: "Which of these is NOT an operating system?",
+        options: ["A) Windows", "B) MacOS", "C) Microsoft Word", "D) Linux"],
+        correct: 2
+      },
+      {
+        question: "What does 'CPU' stand for?",
+        options: ["A) Computer Processing Unit", "B) Central Processing Unit", "C) Control Processing Unit", "D) Core Processing Unit"],
+        correct: 1
+      }
+    ];
+
+    const bonusQuestions = [
+      {
+        question: "What is the smallest prime number?",
+        options: ["A) 1", "B) 2", "C) 3", "D) 0"],
+        correct: 1
+      },
+      {
+        question: "Which gas do plants absorb from the atmosphere?",
+        options: ["A) Oxygen", "B) Nitrogen", "C) Carbon Dioxide", "D) Hydrogen"],
+        correct: 2
+      },
+      {
+        question: "What is the chemical symbol for water?",
+        options: ["A) H2O", "B) CO2", "C) NaCl", "D) O2"],
+        correct: 0
+      },
+      {
+        question: "How many continents are there?",
+        options: ["A) 5", "B) 6", "C) 7", "D) 8"],
+        correct: 2
+      },
+      {
+        question: "What is the largest mammal in the world?",
+        options: ["A) Elephant", "B) Blue Whale", "C) Giraffe", "D) Hippo"],
+        correct: 1
+      },
+      {
+        question: "Which planet is closest to the Sun?",
+        options: ["A) Venus", "B) Earth", "C) Mercury", "D) Mars"],
+        correct: 2
+      },
+      {
+        question: "What is the capital of Japan?",
+        options: ["A) Seoul", "B) Beijing", "C) Bangkok", "D) Tokyo"],
+        correct: 3
+      },
+      {
+        question: "How many minutes are in an hour?",
+        options: ["A) 50", "B) 60", "C) 70", "D) 80"],
+        correct: 1
+      }
+    ];
+
+    function loadQuestion() {
+      const levelIndicator = document.getElementById('levelIndicator');
+      const questionElement = document.getElementById('question');
+      const optionsElement = document.getElementById('options');
+      const resultElement = document.getElementById('result');
+      const nextButton = document.getElementById('nextButton');
+
+      // Reset display
+      resultElement.style.display = 'none';
+      nextButton.style.display = 'none';
+      
+      levelIndicator.textContent = `Round 4 - Question ${questionsAnswered + 1} of 4`;
+      
+      const currentQuestion = mainQuestions[currentLevel];
+      questionElement.textContent = currentQuestion.question;
+      
+      optionsElement.innerHTML = '';
+      currentQuestion.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        optionDiv.textContent = option;
+        optionDiv.onclick = () => selectAnswer(index);
+        optionsElement.appendChild(optionDiv);
+      });
+    }
+
+    function loadBonusQuestion() {
+      const levelIndicator = document.getElementById('levelIndicator');
+      const questionElement = document.getElementById('question');
+      const optionsElement = document.getElementById('options');
+      const resultElement = document.getElementById('result');
+      const nextButton = document.getElementById('nextButton');
+
+      // Reset display
+      resultElement.style.display = 'none';
+      nextButton.style.display = 'none';
+      
+      levelIndicator.textContent = `Round 4 - Bonus Question`;
+      
+      const randomQuestion = bonusQuestions[Math.floor(Math.random() * bonusQuestions.length)];
+      questionElement.textContent = randomQuestion.question;
+      
+      optionsElement.innerHTML = '';
+      randomQuestion.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        optionDiv.textContent = option;
+        optionDiv.onclick = () => selectBonusAnswer(index, randomQuestion.correct);
+        optionsElement.appendChild(optionDiv);
+      });
+    }
+
+    function selectAnswer(selectedIndex) {
+      const options = document.querySelectorAll('.option');
+      const resultElement = document.getElementById('result');
+      const nextButton = document.getElementById('nextButton');
+      
+      // Disable all options
+      options.forEach(option => option.classList.add('disabled'));
+      
+      const currentQuestion = mainQuestions[currentLevel];
+      
+      if (selectedIndex === currentQuestion.correct) {
+        // Correct answer
+        questionsAnswered++;
+        currentLevel++;
+        
+        if (questionsAnswered === 4) {
+          // Final question completed - show modal instead of clue text
+          openModal();
+        } else {
+          resultElement.className = 'result correct';
+          resultElement.textContent = `✅ Correct! Continue to next question.`;
+          nextButton.textContent = 'Next Question';
+          nextButton.style.display = 'block';
+        }
+      } else {
+        // Wrong answer - load bonus question
+        resultElement.className = 'result wrong';
+        resultElement.textContent = '❌ Wrong answer! Answer a bonus question to continue.';
+        nextButton.textContent = 'Try Bonus Question';
+        nextButton.onclick = loadBonusQuestion;
+        nextButton.style.display = 'block';
+      }
+      
+      resultElement.style.display = 'block';
+    }
+
+    function selectBonusAnswer(selectedIndex, correctIndex) {
+      const options = document.querySelectorAll('.option');
+      const resultElement = document.getElementById('result');
+      const nextButton = document.getElementById('nextButton');
+      
+      // Disable all options
+      options.forEach(option => option.classList.add('disabled'));
+      
+      if (selectedIndex === correctIndex) {
+        // Correct bonus answer - continue with main questions
+        resultElement.className = 'result correct';
+        resultElement.textContent = '✅ Great! Continue with the main questions.';
+        nextButton.textContent = 'Continue';
+        nextButton.onclick = nextQuestion;
+        nextButton.style.display = 'block';
+      } else {
+        // Wrong bonus answer - try another bonus question
+        resultElement.className = 'result wrong';
+        resultElement.textContent = '❌ Try another bonus question.';
+        nextButton.textContent = 'Try Again';
+        nextButton.onclick = loadBonusQuestion;
+        nextButton.style.display = 'block';
+      }
+      
+      resultElement.style.display = 'block';
+    }
+
+    function nextQuestion() {
+      if (questionsAnswered === 4) return;
+      const nextButton = document.getElementById('nextButton');
+      nextButton.onclick = nextQuestion;
+      loadQuestion();
+    }
+
+    // Modal functions
+    const resultModal = document.getElementById("resultModal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    function openModal() { resultModal.classList.add("show"); }
+    function closeModal() { resultModal.classList.remove("show"); }
+    closeModalBtn.addEventListener("click", closeModal);
+
+    // Initialize first question
+    loadQuestion();
+  </script>
+</body>
+</html>
