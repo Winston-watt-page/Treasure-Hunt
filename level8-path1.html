@@ -1,247 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Round 4 - MCQ Puzzle</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-    body {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, sans-serif;
-      background: #0d1117;
-      color: white;
-      text-align: center;
-      padding: 15px;
-    }
-    .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; }
-    .level-indicator {
-      background: rgba(56,189,248,0.1);
-      border: 1px solid #38bdf8;
-      border-radius: 20px;
-      padding: 8px 16px;
-      margin-bottom: 20px;
-      font-size: clamp(12px, 3vw, 14px);
-      color: #38bdf8;
-    }
-    h2 {
-      font-size: clamp(16px, 4vw, 20px);
-      margin-bottom: 20px;
-      color: #38bdf8;
-      text-shadow: 0 0 10px rgba(56,189,248,0.8);
-    }
-    .option {
-      background: #1e293b;
-      border: 2px solid #38bdf8;
-      border-radius: 12px;
-      padding: 14px;
-      margin: 8px 0;
-      width: 100%;
-      cursor: pointer;
-      transition: 0.3s;
-      font-size: clamp(14px, 4vw, 16px);
-      color: white;
-      box-shadow: 0 0 10px rgba(56,189,248,0.4);
-    }
-    .option:hover { background: rgba(56,189,248,0.2); transform: scale(1.02); }
-    .option.disabled { opacity: 0.3; pointer-events: none; }
-    .result {
-      margin-top: 20px; padding: 20px; border-radius: 10px;
-      font-size: clamp(14px, 4vw, 18px); font-weight: bold; display: none;
-    }
-    .correct { background: rgba(34,197,94,0.2); border: 2px solid #22c55e; color: #22c55e; }
-    .wrong { background: rgba(239,68,68,0.2); border: 2px solid #ef4444; color: #ef4444; }
-    .next-button {
-      background: #38bdf8; color: black; border: none; padding: 12px 24px;
-      border-radius: 8px; font-size: clamp(14px, 4vw, 16px); font-weight: bold;
-      cursor: pointer; margin-top: 15px; transition: 0.3s;
-    }
-    .next-button:hover { background: #0ea5e9; transform: scale(1.05); }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Round 4 - MCQ Puzzle</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; }
+    .level-indicator {
+      background: rgba(56,189,248,0.1);
+      border: 1px solid #38bdf8;
+      border-radius: 20px;
+      padding: 8px 16px;
+      margin-bottom: 20px;
+      font-size: clamp(12px, 3vw, 14px);
+      color: #38bdf8;
+    }
+    h2 {
+      font-size: clamp(16px, 4vw, 20px);
+      margin-bottom: 20px;
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56,189,248,0.8);
+    }
+    .option {
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 8px 0;
+      width: 100%;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: clamp(14px, 4vw, 16px);
+      color: white;
+      box-shadow: 0 0 10px rgba(56,189,248,0.4);
+    }
+    .option:hover { background: rgba(56,189,248,0.2); transform: scale(1.02); }
+    .option.disabled { opacity: 0.3; pointer-events: none; }
+    .result {
+      margin-top: 20px; padding: 20px; border-radius: 10px;
+      font-size: clamp(14px, 4vw, 18px); font-weight: bold; display: none;
+    }
+    .correct { background: rgba(34,197,94,0.2); border: 2px solid #22c55e; color: #22c55e; }
+    .wrong { background: rgba(239,68,68,0.2); border: 2px solid #ef4444; color: #ef4444; }
+    .next-button {
+      background: #38bdf8; color: black; border: none; padding: 12px 24px;
+      border-radius: 8px; font-size: clamp(14px, 4vw, 16px); font-weight: bold;
+      cursor: pointer; margin-top: 15px; transition: 0.3s;
+    }
+    .next-button:hover { background: #0ea5e9; transform: scale(1.05); }
 
-    /* 🎉 Popup Modal - Blue Theme */
-    .popup {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8); display: flex;
-      align-items: center; justify-content: center; z-index: 1000;
-    }
-    .popup-content {
-      background: rgba(13,17,23,0.95);
-      border: 2px solid #38bdf8;
-      border-radius: 15px;
-      padding: 30px;
-      max-width: 400px;
-      text-align: center;
-      color: #38bdf8;
-      font-size: 18px;
-      animation: popupScale 0.4s ease-in-out;
-      text-shadow: 0 0 12px rgba(56,189,248,0.8);
-    }
-    @keyframes popupScale {
-      from { transform: scale(0.5); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .popup button {
-      margin-top: 20px;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #0d1117;
-      transition: 0.3s;
-    }
-    .popup button:hover {
-      background: #0ea5e9;
-    }
-  </style>
+    /* 🎉 Popup Modal - Blue Theme */
+    .popup {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8);
+      align-items: center; justify-content: center; z-index: 1000;
+    }
+    .popup-content {
+      background: rgba(13,17,23,0.95);
+      border: 2px solid #38bdf8;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 400px;
+      text-align: center;
+      color: #38bdf8;
+      font-size: 18px;
+      animation: popupScale 0.4s ease-in-out;
+      text-shadow: 0 0 12px rgba(56,189,248,0.8);
+    }
+    @keyframes popupScale {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .popup button {
+      margin-top: 20px;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #0d1117;
+      transition: 0.3s;
+    }
+    .popup button:hover {
+      background: #0ea5e9;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="level-indicator" id="levelIndicator">Round 4 - Question 1 of 5</div>
-    <h2 id="question"></h2>
-    <div id="options"></div>
-    <div class="result" id="result"></div>
-    <button class="next-button" id="nextButton" style="display: none;">Next Question</button>
-  </div>
+  <div class="container">
+    <div class="level-indicator" id="levelIndicator">Round 4 - Question 1 of 5</div>
+    <h2 id="question"></h2>
+    <div id="options"></div>
+    <div class="result" id="result"></div>
+    <button class="next-button" id="nextButton" style="display: none;">Next Question</button>
+  </div>
 
-  <!-- 🎉 Popup Modal -->
-  <div class="popup" id="congratsPopup">
-    <div class="popup-content">
-      <h2>🎉 Congratulations! 🎉</h2>
-      <p>Final Clue: Go to lift or elevator and find the QR code! 🛗</p>
-      <button onclick="closePopup()">OK</button>
-    </div>
-  </div>
+    <div class="popup" id="congratsPopup">
+    <div class="popup-content">
+      <h2>🎉 Congratulations! 🎉</h2>
+      <p>Final Clue: Go to lift or elevator and find the QR code! 🛗</p>
+      <button onclick="closePopup()">OK</button>
+    </div>
+  </div>
 
-  <script>
-    let currentLevel = 0;
+  <script>
+    let currentLevel = 0;
 
-    const mainQuestions = [
-      { question: "Which data structure uses FIFO order?", options: ["Stack","Queue","Tree","Graph"], correct: 1 },
-      { question: "Which language is mainly used for AI?", options: ["Python","HTML","CSS","SQL"], correct: 0 },
-      { question: "Which key is used as a primary key in databases?", options: ["Unique Key","Foreign Key","Candidate Key","Super Key"], correct: 2 },
-      { question: "Which protocol is used to send emails?", options: ["FTP","SMTP","HTTP","POP3"], correct: 1 },
-      { question: "Which of these is NOT an OOP principle?", options: ["Encapsulation","Abstraction","Inheritance","Compilation"], correct: 3 }
-    ];
+    const mainQuestions = [
+      { question: "Which data structure uses FIFO order?", options: ["Stack","Queue","Tree","Graph"], correct: 1 },
+      { question: "Which language is mainly used for AI?", options: ["Python","HTML","CSS","SQL"], correct: 0 },
+      { question: "Which key is used as a primary key in databases?", options: ["Unique Key","Foreign Key","Candidate Key","Super Key"], correct: 2 },
+      { question: "Which protocol is used to send emails?", options: ["FTP","SMTP","HTTP","POP3"], correct: 1 },
+      { question: "Which of these is NOT an OOP principle?", options: ["Encapsulation","Abstraction","Inheritance","Compilation"], correct: 3 }
+    ];
 
-    const bonusQuestions = [
-      { question: "Which layer of OSI model handles data encryption?", options: ["Session","Presentation","Network","Application"], correct: 1 },
-      { question: "Which sorting algorithm is the fastest in average case?", options: ["Bubble Sort","Quick Sort","Selection Sort","Insertion Sort"], correct: 1 },
-      { question: "Which of the following is a NoSQL database?", options: ["MySQL","PostgreSQL","MongoDB","Oracle"], correct: 2 }
-    ];
+    const bonusQuestions = [
+      { question: "Which layer of OSI model handles data encryption?", options: ["Session","Presentation","Network","Application"], correct: 1 },
+      { question: "Which sorting algorithm is the fastest in average case?", options: ["Bubble Sort","Quick Sort","Selection Sort","Insertion Sort"], correct: 1 },
+      { question: "Which of the following is a NoSQL database?", options: ["MySQL","PostgreSQL","MongoDB","Oracle"], correct: 2 }
+    ];
 
-    function loadQuestion() {
-      if(currentLevel >= mainQuestions.length){
-        return; // Do not auto-show popup here
-      }
+    function loadQuestion() {
+      if(currentLevel >= mainQuestions.length){
+        return; // Do not auto-show popup here
+      }
 
-      const q = mainQuestions[currentLevel];
-      document.getElementById('levelIndicator').textContent = `Round 4 - Question ${currentLevel + 1} of ${mainQuestions.length}`;
-      document.getElementById('question').textContent = q.question;
+      const q = mainQuestions[currentLevel];
+      document.getElementById('levelIndicator').textContent = `Round 4 - Question ${currentLevel + 1} of ${mainQuestions.length}`;
+      document.getElementById('question').textContent = q.question;
 
-      const optionsDiv = document.getElementById('options');
-      optionsDiv.innerHTML = '';
-      q.options.forEach((opt, i) => {
-        const div = document.createElement('div');
-        div.className = 'option';
-        div.textContent = opt;
-        div.onclick = () => selectAnswer(i);
-        optionsDiv.appendChild(div);
-      });
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.onclick = () => selectAnswer(i);
+        optionsDiv.appendChild(div);
+      });
 
-      const result = document.getElementById('result');
-      result.style.display = 'none';
-      const nextBtn = document.getElementById('nextButton');
-      nextBtn.style.display = 'none';
-      nextBtn.onclick = nextQuestion;
-    }
+      const result = document.getElementById('result');
+      result.style.display = 'none';
+      const nextBtn = document.getElementById('nextButton');
+      nextBtn.style.display = 'none';
+      nextBtn.onclick = nextQuestion;
+    }
 
-    function selectAnswer(i) {
-      const q = mainQuestions[currentLevel];
-      const result = document.getElementById('result');
-      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      const nextBtn = document.getElementById('nextButton');
+    function selectAnswer(i) {
+      const q = mainQuestions[currentLevel];
+      const result = document.getElementById('result');
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      const nextBtn = document.getElementById('nextButton');
 
-      if(i === q.correct){
-        result.className = 'result correct';
-        result.textContent = "✅ Correct!";
+      if(i === q.correct){
+        result.className = 'result correct';
+        result.textContent = "✅ Correct!";
 
-        if(currentLevel === mainQuestions.length - 1){
-          // Last question answered correctly → show final clue popup
-          document.getElementById('congratsPopup').style.display = 'flex';
-          nextBtn.style.display = 'none';
-        } else {
-          currentLevel++;
-          nextBtn.textContent = "Next Question";
-          nextBtn.onclick = nextQuestion;
-          nextBtn.style.display = 'block';
-        }
+        if(currentLevel === mainQuestions.length - 1){
+          // Last question answered correctly → show final clue popup
+          document.getElementById('congratsPopup').style.display = 'flex';
+          nextBtn.style.display = 'none';
+        } else {
+          currentLevel++;
+          nextBtn.textContent = "Next Question";
+          nextBtn.onclick = nextQuestion;
+          nextBtn.style.display = 'block';
+        }
 
-      } else {
-        result.className = 'result wrong';
-        result.textContent = "❌ Wrong answer! Try a bonus question.";
-        nextBtn.textContent = "Bonus Question";
-        nextBtn.onclick = loadBonusQuestion;
-        nextBtn.style.display = 'block';
-      }
-      result.style.display = 'block';
-    }
+      } else {
+        result.className = 'result wrong';
+        result.textContent = "❌ Wrong answer! Try a bonus question.";
+        nextBtn.textContent = "Bonus Question";
+        nextBtn.onclick = loadBonusQuestion;
+        nextBtn.style.display = 'block';
+      }
+      result.style.display = 'block';
+    }
 
-    function loadBonusQuestion(){
-      const random = bonusQuestions[Math.floor(Math.random() * bonusQuestions.length)];
-      document.getElementById('levelIndicator').textContent = "Round 4 - Bonus Question";
-      document.getElementById('question').textContent = random.question;
+    function loadBonusQuestion(){
+      const random = bonusQuestions[Math.floor(Math.random() * bonusQuestions.length)];
+      document.getElementById('levelIndicator').textContent = "Round 4 - Bonus Question";
+      document.getElementById('question').textContent = random.question;
 
-      const optionsDiv = document.getElementById('options');
-      optionsDiv.innerHTML = '';
-      random.options.forEach((opt, i) => {
-        const div = document.createElement('div');
-        div.className = 'option';
-        div.textContent = opt;
-        div.onclick = () => selectBonusAnswer(i, random.correct);
-        optionsDiv.appendChild(div);
-      });
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      random.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.onclick = () => selectBonusAnswer(i, random.correct);
+        optionsDiv.appendChild(div);
+      });
 
-      const result = document.getElementById('result');
-      result.style.display = 'none';
-      const nextBtn = document.getElementById('nextButton');
-      nextBtn.style.display = 'none';
-    }
+      const result = document.getElementById('result');
+      result.style.display = 'none';
+      const nextBtn = document.getElementById('nextButton');
+      nextBtn.style.display = 'none';
+    }
 
-    function selectBonusAnswer(i, correct){
-      const result = document.getElementById('result');
-      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      const nextBtn = document.getElementById('nextButton');
+    function selectBonusAnswer(i, correct){
+      const result = document.getElementById('result');
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      const nextBtn = document.getElementById('nextButton');
 
-      if(i === correct){
-        result.className = 'result correct';
-        result.textContent = "✅ Correct! Continue main questions.";
-        nextBtn.textContent = "Continue";
-        nextBtn.onclick = nextQuestion;
-      } else {
-        result.className = 'result wrong';
-        result.textContent = "❌ Wrong! Try another bonus question.";
-        nextBtn.textContent = "Try Again";
-        nextBtn.onclick = loadBonusQuestion;
-      }
-      result.style.display = 'block';
-      nextBtn.style.display = 'block';
-    }
+      if(i === correct){
+        result.className = 'result correct';
+        result.textContent = "✅ Correct! Continue main questions.";
+        nextBtn.textContent = "Continue";
+        nextBtn.onclick = nextQuestion;
+      } else {
+        result.className = 'result wrong';
+        result.textContent = "❌ Wrong! Try another bonus question.";
+        nextBtn.textContent = "Try Again";
+        nextBtn.onclick = loadBonusQuestion;
+      }
+      result.style.display = 'block';
+      nextBtn.style.display = 'block';
+    }
 
-    function nextQuestion(){
-      currentLevel++;
-      loadQuestion();
-    }
+    function nextQuestion(){
+      currentLevel++;
+      loadQuestion();
+    }
 
-    function closePopup(){
-      document.getElementById('congratsPopup').style.display = 'none';
-    }
+    function closePopup(){
+      document.getElementById('congratsPopup').style.display = 'none';
+    }
 
-    // Start the quiz
-    loadQuestion();
-  </script>
+    // Start the quiz
+    loadQuestion();
+  </script>
 </body>
 </html>
