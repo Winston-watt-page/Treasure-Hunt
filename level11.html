@@ -37,7 +37,7 @@
       width: 220px;
       cursor: pointer;
       box-shadow: 0 0 20px rgba(56,189,248,0.5);
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: transform 0.3s, box-shadow 0.3s, opacity 0.3s;
     }
     .hero:hover {
       transform: scale(1.05);
@@ -62,16 +62,22 @@
       display: none;
       max-width: 500px;
     }
+    .disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: none !important;
+    }
   </style>
 </head>
 <body>
   <h1>Choose Your Hero</h1>
   <div class="heroes">
-    <div class="hero" onclick="chooseHero('spiderman')">
+    <div class="hero" id="spiderman" onclick="chooseHero('spiderman')">
       <img src="spiderman.jpg" alt="Spider-Man">
       <p>🕸 Spider-Man</p>
     </div>
-    <div class="hero" onclick="chooseHero('ironman')">
+    <div class="hero" id="ironman" onclick="chooseHero('ironman')">
       <img src="ironman.jpg" alt="Iron Man">
       <p>⚡ Iron-Man</p>
     </div>
@@ -80,13 +86,24 @@
   <div id="hintBox" class="hint-box"></div>
 
   <script>
+    let chosen = false;
+
     function chooseHero(hero){
+      if(chosen) return; // stop if already chosen
+      chosen = true;
+
+      const spiderman = document.getElementById('spiderman');
+      const ironman = document.getElementById('ironman');
       const hintBox = document.getElementById('hintBox');
+
       if(hero === 'spiderman'){
         hintBox.textContent = "🕸 I hang like a web — look above shelves, cupboard tops, or the board frame.";
+        ironman.classList.add('disabled');
       } else {
         hintBox.textContent = "⚡ I glow with gadgets and power — check under desks near plugs or the computer table (safe, no sockets).";
+        spiderman.classList.add('disabled');
       }
+
       hintBox.style.display = "block";
     }
   </script>
