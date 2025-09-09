@@ -1,90 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Final Round - Choose Your Hero</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-    body {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      font-family: Arial, sans-serif;
-      background: #0d1117;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: clamp(22px, 6vw, 36px);
-      color: #38bdf8;
-      margin-bottom: 40px;
-      text-shadow: 0 0 15px rgba(56,189,248,0.8);
-    }
-    .heroes {
-      display: flex;
-      gap: 40px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .hero {
-      background: rgba(30,41,59,0.9);
-      border: 2px solid #38bdf8;
-      border-radius: 20px;
-      padding: 40px 50px;
-      min-width: 220px;
-      cursor: pointer;
-      font-size: clamp(16px, 5vw, 20px);
-      color: white;
-      font-weight: bold;
-      text-transform: uppercase;
-      transition: 0.4s;
-      box-shadow: 0 0 25px rgba(56,189,248,0.5);
-      transform-style: preserve-3d;
-    }
-    .hero:hover {
-      transform: perspective(500px) rotateY(8deg) scale(1.05);
-      background: #38bdf8;
-      color: #0d1117;
-      text-shadow: none;
-    }
-    .hint-box {
-      margin-top: 50px;
-      padding: 25px;
-      border-radius: 15px;
-      max-width: 500px;
-      font-size: clamp(16px, 5vw, 22px);
-      font-weight: bold;
-      display: none;
-      background: rgba(56,189,248,0.1);
-      border: 2px solid #38bdf8;
-      color: #38bdf8;
-      text-shadow: 0 0 8px rgba(56,189,248,0.8);
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Choose Your Hero — 3D Holograms</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --accent:#38bdf8;
+    --muted:#98a6c0;
+    --spidey:#e74c3c;
+    --iron:#f39c12;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#05080b 0%, #0d1117 100%);font-family:Inter,system-ui,Arial;color:#e6eef8}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;gap:28px;flex-direction:column}
+  h1{color:var(--accent);text-shadow:0 0 14px rgba(56,189,248,0.6);margin:0 0 6px;font-size:clamp(20px,5vw,36px);text-align:center}
+  p.lead{color:var(--muted);margin:0 0 18px;text-align:center}
+  .stage{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;justify-content:center;width:100%;max-width:1100px}
+  .card{
+    width:340px;
+    min-height:360px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:16px;
+    padding:16px;
+    border:1px solid rgba(255,255,255,0.04);
+    box-shadow:0 20px 60px rgba(2,6,23,0.7);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    position:relative;
+    cursor:pointer;
+    transition:transform .18s, box-shadow .18s;
+  }
+  .card:active{transform:translateY(2px)}
+  .label{font-weight:800;letter-spacing:0.6px}
+  .sub{font-size:13px;color:var(--muted)}
+  canvas{width:100%;height:260px; display:block; border-radius:12px; background:transparent;}
+  .hint{
+    margin-top:8px;
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    display:none;
+    font-weight:700;
+    color:#021822;
+  }
+  .hint.spidey{background: linear-gradient(90deg, rgba(231,76,60,0.14), rgba(56,189,248,0.06)); color:#ffeaea}
+  .hint.iron{background: linear-gradient(90deg, rgba(243,156,18,0.12), rgba(56,189,248,0.03)); color:#fff7e6}
+
+  .footer-note{margin-top:10px;color:var(--muted);font-size:13px;text-align:center;max-width:700px}
+  .small-btn{margin-top:10px;background:transparent;border:1px solid rgba(255,255,255,0.05);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
+  @media (max-width:760px){
+    .card{width:88vw;min-height:320px}
+  }
+</style>
 </head>
 <body>
-  <h1>Choose Your Hero</h1>
-  <div class="heroes">
-    <div class="hero" onclick="chooseHero('spiderman')">🕸 Spider-Man</div>
-    <div class="hero" onclick="chooseHero('ironman')">🦾 Iron-Man</div>
+  <div class="wrap">
+    <h1>Choose Your Hero</h1>
+    <p class="lead">Tap a hologram. Spider → Hang high (web). Iron → Search near power / wires (safe spot).</p>
+
+    <div class="stage">
+      <div class="card" id="spideyCard" role="button" tabindex="0" aria-label="Choose Spider-Man">
+        <div id="spideyCanvasWrap" style="width:100%;height:260px;border-radius:12px;overflow:hidden"></div>
+        <div class="label" style="color:var(--spidey)">🕸 SPIDER-THEME</div>
+        <div class="sub">Web, heights & hidden corners</div>
+        <div id="spideyHint" class="hint spidey">I hang like a web — look above shelves, cupboard tops, or the board frame.</div>
+      </div>
+
+      <div class="card" id="ironCard" role="button" tabindex="0" aria-label="Choose Iron-Man">
+        <div id="ironCanvasWrap" style="width:100%;height:260px;border-radius:12px;overflow:hidden"></div>
+        <div class="label" style="color:var(--iron)">⚡ IRON-THEME</div>
+        <div class="sub">Tech, power & secret compartments</div>
+        <div id="ironHint" class="hint iron">I glow near power — check under desks near plugs or inside the computer table (don’t touch sockets).</div>
+      </div>
+    </div>
+
+    <div class="footer-note">Teacher tip: prepare the corresponding hiding spots in advance and keep all places safe (no live sockets or dangerously high placement).</div>
   </div>
 
-  <div id="hintBox" class="hint-box"></div>
-
+  <!-- Three.js (r75+ style via CDN) -->
+  <script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
   <script>
-    function chooseHero(hero){
-      const hintBox = document.getElementById('hintBox');
-      if(hero === 'spiderman'){
-        hintBox.textContent = "🕸 I hang like a web, not on the ground — look above to find me.";
-      } else {
-        hintBox.textContent = "⚡ I glow with power near the switch — look where the wires meet.";
-      }
-      hintBox.style.display = "block";
+  // ---------- Utility: build 3D scene in a container ----------
+  function createScene(container, onInit) {
+    const scene = new THREE.Scene();
+    const w = container.clientWidth, h = container.clientHeight;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
+    camera.position.set(0, 0, 6);
+
+    // subtle fog for hologram feel
+    scene.fog = new THREE.FogExp2(0x05070a, 0.06);
+
+    // ambient and rim lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.25);
+    scene.add(ambient);
+
+    const rim = new THREE.DirectionalLight(0xffffff, 0.8);
+    rim.position.set(5, 10, 7);
+    scene.add(rim);
+
+    // helper resize
+    window.addEventListener('resize', ()=> {
+      const rw = container.clientWidth, rh = container.clientHeight;
+      renderer.setSize(rw, rh);
+      camera.aspect = rw / rh;
+      camera.updateProjectionMatrix();
+    });
+
+    // return core objects
+    onInit({ scene, camera, renderer });
+    // animation loop
+    let running = true;
+    function animate() {
+      if(!running) return;
+      requestAnimationFrame(animate);
+      // user-provided tick
+      if(onInit && onInit.tick) onInit.tick();
+      renderer.render(scene, camera);
     }
+    animate();
+
+    // cleanup
+    return {
+      stop: ()=> running=false,
+      resize: ()=> { renderer.setSize(container.clientWidth, container.clientHeight); camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix(); },
+      renderer, camera, scene
+    };
+  }
+
+  // ---------- Spider-style hologram ----------
+  (function initSpider(){
+    const wrap = document.getElementById('spideyCanvasWrap');
+
+    const obj = createScene(wrap, function(ctx){
+      const { scene } = ctx;
+
+      // create a translucent rotating ring (web-like)
+      const ringGeo = new THREE.TorusGeometry(1.6, 0.05, 16, 120);
+      const ringMat = new THREE.MeshStandardMaterial({
+        color: 0xe74c3c,
+        emissive: 0xe74c3c,
+        emissiveIntensity: 0.7,
+        transparent: true,
+        opacity: 0.85,
+        metalness: 0.1,
+        roughness: 0.2,
+        side: THREE.DoubleSide
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI/6;
+      scene.add(ring);
+
+      // inner web lines — many thin cylinders radiating
+      const linesGroup = new THREE.Group();
+      const lineMat = new THREE.MeshBasicMaterial({ color: 0xffb3b3, transparent:true, opacity:0.9});
+      const seg = 12;
+      for(let i=0;i<seg;i++){
+        const a = (i/seg) * Math.PI*2;
+        const x = Math.cos(a)*1.0, y = Math.sin(a)*1.0;
+        const cylGeo = new THREE.CylinderGeometry(0.01,0.01,1.8,6);
+        const cyl = new THREE.Mesh(cylGeo, lineMat);
+        cyl.position.set(x*0.5, y*0.5, Math.sin(i)*0.02);
+        cyl.lookAt(0,0,0);
+        cyl.rotateX(Math.PI/2);
+        linesGroup.add(cyl);
+      }
+      scene.add(linesGroup);
+
+      // soft glowing core
+      const coreGeo = new THREE.SphereGeometry(0.25, 32, 24);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xff6b6b, transparent:true, opacity:0.95});
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      scene.add(core);
+
+      // subtle ring glow with sprite
+      const spriteMap = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/disc.png');
+      const spriteMat = new THREE.SpriteMaterial({ map: spriteMap, color: 0xff5a5a, blending: THREE.AdditiveBlending, transparent:true, opacity:0.35 });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(2.6,2.6,1);
+      scene.add(sprite);
+
+      // store for tick
+      ctx.ring = ring; ctx.lines = linesGroup; ctx.core = core; ctx.sprite = sprite;
+    });
+
+    // simple animation tick
+    (function tick(){
+      if(!obj) return;
+      const { scene } = obj;
+      // rotate children slowly
+      scene.traverse(child=>{
+        if(child.isMesh || child.isGroup || child.isSprite){
+          child.rotation && (child.rotation.z += 0.007);
+        }
+      });
+      requestAnimationFrame(tick);
+    })();
+
+    // pointer interactivity: small parallax
+    wrap.addEventListener('mousemove', (e)=>{
+      const r = wrap.getBoundingClientRect();
+      const x = (e.clientX - r.left)/r.width * 2 - 1;
+      const y = (e.clientY - r.top)/r.height * 2 - 1;
+      obj.scene.rotation.y = x*0.15;
+      obj.scene.rotation.x = y*0.08;
+    });
+  })();
+
+  // ---------- Iron-style hologram ----------
+  (function initIron(){
+    const wrap = document.getElementById('ironCanvasWrap');
+
+    const obj = createScene(wrap, function(ctx){
+      const { scene } = ctx;
+
+      // arc rings (several concentric rings)
+      const rings = new THREE.Group();
+      for(let i=0;i<4;i++){
+        const radius = 0.6 + i*0.25;
+        const geo = new THREE.TorusGeometry(radius, 0.03, 12, 120);
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0xf39c12,
+          emissive: 0xf39c12,
+          emissiveIntensity: 0.6 - i*0.08,
+          transparent:true,
+          opacity: 0.95 - i*0.12,
+          metalness:0.6,
+          roughness:0.2
+        });
+        const m = new THREE.Mesh(geo, mat);
+        m.rotation.x = Math.PI/2;
+        m.rotation.y = i*0.2;
+        rings.add(m);
+      }
+      scene.add(rings);
+
+      // central core (glowing)
+      const coreGeo = new THREE.SphereGeometry(0.28, 32, 24);
+      const coreMat = new THREE.MeshStandardMaterial({ color: 0xdff7ff, emissive:0xaff8ff, emissiveIntensity:1.2, metalness:0.3, roughness:0.1 });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      core.position.set(0,0,0.02);
+      scene.add(core);
+
+      // small tech bits (boxes)
+      const boxGeo = new THREE.BoxGeometry(0.12,0.06,0.05);
+      const boxMat = new THREE.MeshStandardMaterial({ color:0xf7d9b3, metalness:0.4, roughness:0.3 });
+      for(let i=0;i<6;i++){
+        const b = new THREE.Mesh(boxGeo, boxMat);
+        const a = (i/6)*Math.PI*2;
+        b.position.set(Math.cos(a)*0.95, Math.sin(a)*0.95, (i%2)*0.05 - 0.02);
+        b.rotation.z = a;
+        scene.add(b);
+      }
+
+      // soft glow sprite
+      const spriteMap = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/disc.png');
+      const spriteMat = new THREE.SpriteMaterial({ map: spriteMap, color: 0x9fe9ff, blending: THREE.AdditiveBlending, transparent:true, opacity:0.4 });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(2.2,2.2,1);
+      scene.add(sprite);
+
+      ctx.rings = rings; ctx.core = core;
+    });
+
+    (function tick(){
+      if(!obj) return;
+      obj.scene.traverse(child=>{
+        if(child.isMesh || child.isGroup || child.isSprite){
+          child.rotation && (child.rotation.z += 0.006);
+        }
+      });
+      requestAnimationFrame(tick);
+    })();
+
+    wrap.addEventListener('mousemove', (e)=>{
+      const r = wrap.getBoundingClientRect();
+      const x = (e.clientX - r.left)/r.width * 2 - 1;
+      const y = (e.clientY - r.top)/r.height * 2 - 1;
+      obj.scene.rotation.y = x*0.12;
+      obj.scene.rotation.x = y*0.06;
+    });
+  })();
+
+  // ---------- Click handling for cards ----------
+  const spideyCard = document.getElementById('spideyCard');
+  const ironCard = document.getElementById('ironCard');
+  const spideyHint = document.getElementById('spideyHint');
+  const ironHint = document.getElementById('ironHint');
+
+  function chooseHero(hero){
+    // prevent reselecting both; mark chosen, disable other
+    if(hero === 'spidey'){
+      spideyHint.style.display = 'block';
+      ironHint.style.display = 'none';
+      spideyCard.style.boxShadow = '0 30px 90px rgba(231,76,60,0.12)';
+      ironCard.style.opacity = '0.45';
+      ironCard.style.pointerEvents = 'none';
+      // small audio puff
+      try{ new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=').play().catch(()=>{}); }catch(e){}
+    } else {
+      ironHint.style.display = 'block';
+      spideyHint.style.display = 'none';
+      ironCard.style.boxShadow = '0 30px 90px rgba(243,156,18,0.12)';
+      spideyCard.style.opacity = '0.45';
+      spideyCard.style.pointerEvents = 'none';
+    }
+  }
+
+  spideyCard.addEventListener('click', ()=> chooseHero('spidey'));
+  ironCard.addEventListener('click', ()=> chooseHero('iron'));
+
+  // keyboard accessibility
+  spideyCard.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') chooseHero('spidey'); });
+  ironCard.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') chooseHero('iron'); });
+
   </script>
 </body>
 </html>
