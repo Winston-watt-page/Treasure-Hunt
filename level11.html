@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Final Round — Spider-Man vs Iron-Man</title>
+  <style>
+    :root{
+      --bg:#0b0f1a;
+      --card:#0f1724;
+      --accent-spidey:#e74c3c;
+      --accent-iron:#f39c12;
+      --glass: rgba(255,255,255,0.03);
+      --text:#e6eef8;
+      --muted:#98a6c0;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:Inter,system-ui,Arial;
+      background: linear-gradient(180deg,#051424 0%, #081226 60%, #05101a 100%);
+      color:var(--text);
+      padding:24px;
+    }
+
+    .stage{
+      width:100%;
+      max-width:980px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;
+      padding:28px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    h1{font-size:20px;margin:0 0 6px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+
+    .buttons{
+      display:flex;
+      gap:18px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .holo{
+      flex:1 1 220px;
+      min-width:180px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      padding:18px;
+      text-align:center;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,0.04);
+      transition:transform .18s ease, box-shadow .18s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .holo:active{transform:translateY(2px) scale(.998)}
+    .holo .title{font-weight:700;margin-bottom:6px}
+    .holo .sub{font-size:13px;color:var(--muted);margin-bottom:12px}
+
+    /* Hologram glow */
+    .holo::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(120deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      pointer-events:none;
+    }
+
+    .spidey{border:2px solid rgba(231,76,60,0.14); box-shadow:0 8px 30px rgba(231,76,60,0.06);}
+    .iron{border:2px solid rgba(243,156,18,0.14); box-shadow:0 8px 30px rgba(243,156,18,0.06);}
+
+    .badge{
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:700;
+      letter-spacing:.4px;
+      margin-top:6px;
+    }
+
+    .spidey .badge{background:rgba(231,76,60,0.12); color:var(--accent-spidey)}
+    .iron .badge{background:rgba(243,156,18,0.08); color:var(--accent-iron)}
+
+    .area{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:18px;
+    }
+    .panel{
+      background:var(--card);
+      border-radius:10px;
+      padding:18px;
+      min-height:150px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .right{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .riddle{
+      font-size:16px;
+      line-height:1.45;
+      color:var(--text);
+      min-height:74px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .controls{
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      margin-top:12px;
+    }
+
+    button{
+      background:var(--glass);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:10px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      transition:transform .12s;
+    }
+    button:active{transform:translateY(1px)}
+    .hint{background:rgba(255,255,255,0.02)}
+    .reveal{background:linear-gradient(90deg,#0ea5e9,#06b6d4); color:#021822; font-weight:700}
+
+    .spot{font-weight:800; color:#dcefff; font-size:15px}
+    .subl{color:var(--muted); font-size:13px}
+
+    .note{font-size:13px;color:var(--muted); margin-top:8px; text-align:center}
+
+    footer{margin-top:14px; font-size:13px; color:var(--muted); text-align:center}
+
+    @media (max-width:880px){
+      .area{grid-template-columns:1fr; }
+      .right{order:2}
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" role="main">
+    <h1>Final Round — Choose Your Hero</h1>
+    <p class="lead">Two teams pick a hero hologram. Click a hero to get the riddle for where the treasure is hidden inside the classroom.</p>
+
+    <div class="buttons" aria-hidden="false">
+      <div class="holo spidey" id="spideyBtn" role="button" tabindex="0" aria-pressed="false" aria-label="Choose Spider Man">
+        <div class="title">SPIDER-MAN</div>
+        <div class="sub">Webs, heights, and hidden corners</div>
+        <div class="badge">Choose Spidey</div>
+      </div>
+
+      <div class="holo iron" id="ironBtn" role="button" tabindex="0" aria-pressed="false" aria-label="Choose Iron Man">
+        <div class="title">IRON-MAN</div>
+        <div class="sub">Tech, power, and secret compartments</div>
+        <div class="badge">Choose Iron</div>
+      </div>
+    </div>
+
+    <div class="area">
+      <div class="panel">
+        <div class="riddle" id="riddleArea">Waiting for a hero selection... (Tap a hologram)</div>
+
+        <div class="controls" id="controls" style="display:none">
+          <button class="hint" id="hintBtn">Show hint</button>
+          <button class="reveal" id="revealBtn">Reveal Treasure Spot</button>
+        </div>
+
+        <div class="note" id="safetyNote" style="display:none">
+          Safety: Avoid touching live points or dangerous equipment. Choose safe hiding spots (shelves, cupboard tops, under desks). 
+        </div>
+      </div>
+
+      <div class="panel right">
+        <div>
+          <div style="font-size:14px;color:var(--muted)">Current selection</div>
+          <div style="height:8px"></div>
+          <div id="selection" class="spot">None</div>
+          <div class="subl" id="locationExplain">No location revealed yet.</div>
+        </div>
+
+        <hr style="border:none;height:10px;background:transparent" />
+
+        <div>
+          <div style="font-size:14px;color:var(--muted)">Prize style</div>
+          <div style="height:8px"></div>
+          <div class="subl">Hide a small locked box or envelope with cash. Add a small themed prop (LED for Iron Man, fake web for Spidey).</div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer>Designed for a safe, fun classroom treasure hunt. Do not hide inside electrical sockets or dangerously high places.</footer>
+  </div>
+
+  <!-- Tiny sound effects using WebAudio API (no external files) -->
+  <script>
+    // Simple WebAudio beep helper
+    function beep(freq=440, time=0.12, type='sine', gain=0.08){
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type; o.frequency.value = freq;
+        g.gain.value = gain;
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        setTimeout(()=>{ o.stop(); ctx.close(); }, time*1000);
+      }catch(e){ /* ignore audio errors on some browsers */ }
+    }
+
+    // Riddle and hint variants (simple english, easy to understand)
+    const spiderRiddles = [
+      { r: "I like heights and places above. Look up where things hide; the clue is not on the floor.", hint: "Check the top of cupboards, the window frame, or the shelf above the blackboard.", spot: "On top of the cupboard near the window (taped under a small cloth/web)." },
+      { r: "I hang where webs would be, where shadows gather near the top. Your box sits up high.", hint: "Search above eye level: high shelf, cupboard top, or taped under the board frame.", spot: "Taped to the top shelf above the teacher's desk (behind a file)." }
+    ];
+
+    const ironRiddles = [
+      { r: "I like power and small lights. Look near wires and the place devices charge.", hint: "Check under the teacher's desk by the plug points, or near the computer table (but do NOT touch live wires).", spot: "Hidden under the teacher's desk near the power board — taped to the underside (safe distance from sockets)." },
+      { r: "Where tech is kept and wires meet, you will find my small secret. Not inside sockets — look beside them.", hint: "Look around the computer table, inside a desk drawer, or taped under a table near cables.", spot: "Inside a locked drawer of the computer table (or taped beneath the table near the cable bundle)." }
+    ];
+
+    // DOM
+    const spideyBtn = document.getElementById('spideyBtn');
+    const ironBtn = document.getElementById('ironBtn');
+    const riddleArea = document.getElementById('riddleArea');
+    const controls = document.getElementById('controls');
+    const hintBtn = document.getElementById('hintBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const selection = document.getElementById('selection');
+    const locationExplain = document.getElementById('locationExplain');
+    const safetyNote = document.getElementById('safetyNote');
+
+    // state
+    let current = null;
+    let chosenRiddle = null;
+
+    function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function chooseHero(hero){
+      // disable both after pick (only one path per team)
+      spideyBtn.style.pointerEvents = 'none';
+      ironBtn.style.pointerEvents = 'none';
+      spideyBtn.setAttribute('aria-pressed','false');
+      ironBtn.setAttribute('aria-pressed','false');
+
+      if(hero === 'spidey'){
+        chosenRiddle = pickRandom(spiderRiddles);
+        selection.textContent = 'Spider-Man path';
+        selection.style.color = 'var(--accent-spidey)';
+        beep(620,0.09,'sine',0.06); // little sound
+      } else {
+        chosenRiddle = pickRandom(ironRiddles);
+        selection.textContent = 'Iron-Man path';
+        selection.style.color = 'var(--accent-iron)';
+        beep(220,0.16,'square',0.08);
+      }
+
+      current = hero;
+      riddleArea.textContent = chosenRiddle.r;
+      controls.style.display = 'flex';
+      safetyNote.style.display = 'block';
+      locationExplain.textContent = 'Press "Show hint" if you need help, or "Reveal Treasure Spot" when ready to see the exact hiding place.';
+    }
+
+    // Click handlers
+    spideyBtn.addEventListener('click', ()=> chooseHero('spidey'));
+    ironBtn.addEventListener('click', ()=> chooseHero('iron'));
+
+    // keyboard accessibility
+    spideyBtn.addEventListener('keyup', (e)=>{ if(e.key === 'Enter' || e.key === ' ') chooseHero('spidey'); });
+    ironBtn.addEventListener('keyup', (e)=>{ if(e.key === 'Enter' || e.key === ' ') chooseHero('iron'); });
+
+    hintBtn.addEventListener('click', ()=>{
+      if(!chosenRiddle) return;
+      // show hint briefly
+      riddleArea.textContent = chosenRiddle.hint;
+      beep(480,0.12,'triangle',0.06);
+      // after 5s revert to riddle
+      setTimeout(()=>{ if(chosenRiddle) riddleArea.textContent = chosenRiddle.r; }, 5000);
+    });
+
+    revealBtn.addEventListener('click', ()=>{
+      if(!chosenRiddle) return;
+      riddleArea.innerHTML = "<strong>Treasure Spot:</strong><br>" + chosenRiddle.spot;
+      locationExplain.textContent = "Safe hiding instruction (use props: small LED or fake web).";
+      beep(880,0.18,'sine',0.12);
+      // final: show short confirmation and disable reveal
+      revealBtn.disabled = true;
+      hintBtn.disabled = true;
+      // visually mark chosen button as used
+      if(current === 'spidey'){
+        spideyBtn.style.opacity = '0.7';
+      } else {
+        ironBtn.style.opacity = '0.7';
+      }
+    });
+
+    // Safety reminder: do not tuck box inside sockets or touch wiring.
+    // Use tape, small cloth, or locked envelope. Keep treasure size small and safe.
+
+    // Optional: Reset function for reusing the page (teacher)
+    function resetRound(){
+      chosenRiddle = null;
+      current = null;
+      riddleArea.textContent = 'Waiting for a hero selection... (Tap a hologram)';
+      controls.style.display = 'none';
+      selection.textContent = 'None';
+      locationExplain.textContent = 'No location revealed yet.';
+      safetyNote.style.display = 'none';
+      hintBtn.disabled = false;
+      revealBtn.disabled = false;
+      spideyBtn.style.pointerEvents = 'auto';
+      ironBtn.style.pointerEvents = 'auto';
+      spideyBtn.style.opacity = '1';
+      ironBtn.style.opacity = '1';
+    }
+
+    // Add a keyboard shortcut for teacher: press R to reset
+    document.addEventListener('keydown', (e)=>{
+      if(e.key.toLowerCase() === 'r' && (e.shiftKey || e.ctrlKey)){
+        resetRound();
+      }
+    });
+
+  </script>
+</body>
+</html>
