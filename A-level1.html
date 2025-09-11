@@ -43,7 +43,7 @@
       height: 220px;
       perspective: 800px;
       cursor: grab;
-      touch-action: none; /* Prevent page scrolling during drag */
+      touch-action: none;
     }
 
     .cube {
@@ -85,22 +85,20 @@
       flex-wrap: wrap;
     }
 
-   /* Input field styling */
     input[type="text"] {
-      padding: 10px 14px;         /* Better padding */
+      padding: 10px 14px;
       border-radius: 8px;
       border: none;
       outline: none;
-      margin-right: 10px;         /* Space between input & button */
+      margin-right: 10px;
       font-size: 16px;
-      width: 200px;               /* Fixed width for neatness */
-      max-width: 70vw;            /* Adjusts on mobile */
+      width: 200px;
+      max-width: 70vw;
       box-sizing: border-box;
     }
-    
-    /* Submit button styling */
+
     button {
-      padding: 10px 18px;         /* More padding for clickable area */
+      padding: 10px 18px;
       border-radius: 8px;
       border: none;
       background: #38bdf8;
@@ -109,11 +107,10 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    
+
     button:hover {
       background: #0ea5e9;
     }
-
 
     .clue {
       margin-top: 10px;
@@ -135,7 +132,6 @@
       line-height: 1.4;
     }
 
-    /* 📱 Mobile-friendly tweaks */
     @media (max-width: 600px) {
       .scene { width: 180px; height: 180px; }
       .face { width: 180px; height: 180px; font-size: 2rem; }
@@ -166,32 +162,30 @@
   <main>
     <div class="scene" id="scene">
       <div class="cube" id="cube">
-        <div class="face front">W</div>
-        <div class="face back">N</div>
-        <div class="face right">O</div>
-        <div class="face left">D</div>
+        <div class="face front">S</div>
+        <div class="face back">H</div>
+        <div class="face right">C</div>
+        <div class="face left">T</div>
         <div class="face top">I</div>
         <div class="face bottom">W</div>
       </div>
     </div>
-    <br>
-    <br>
-    <br>
+    <br><br><br>
     <div class="answer-box">
       <input type="text" id="answer" placeholder="Enter your answer">
       <button onclick="checkAnswer()">Submit</button>
     </div>
 
     <div class="clue" id="clue">
-      ✅ Correct! Next clue:<br>Go and check all the <b>window</b> to get QR.
+      ✅ Correct! Next clue:🔑 I’m not a friend, but I give you current!
     </div>
   </main>
 
-  <footer>
+  <!-- <footer>
     <div class="hint">
-      🔑 The answer lets light in, but not everyone sees out.
+      🔑 I’m not a friend, but I give you current!
     </div>
-  </footer>
+  </footer> -->
 
   <script>
     const cube = document.getElementById("cube");
@@ -253,7 +247,7 @@
       const input = document.getElementById("answer").value.trim().toLowerCase();
       const clue = document.getElementById("clue");
 
-      if (input === "window") {
+      if (input === "switch") {
         clue.style.display = "block";
       } else {
         alert("❌ Wrong answer. Try again!");
