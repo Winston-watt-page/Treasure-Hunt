@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Round 2 - Cube Puzzle</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #0d1117;
+      color: white;
+      font-family: Arial, sans-serif;
+      box-sizing: border-box;
+    }
+
+    header {
+      padding: 20px 10px 5px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: clamp(20px, 6vw, 28px);
+      margin: 0;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .scene {
+      width: 220px;
+      height: 220px;
+      perspective: 800px;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-20deg) rotateY(20deg);
+      transition: transform 0.1s ease;
+    }
+
+    .face {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: bold;
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(56,189,248,0.6);
+    }
+
+    .front  { transform: rotateY(0deg) translateZ(110px); }
+    .back   { transform: rotateY(180deg) translateZ(110px); }
+    .right  { transform: rotateY(90deg) translateZ(110px); }
+    .left   { transform: rotateY(-90deg) translateZ(110px); }
+    .top    { transform: rotateX(90deg) translateZ(110px); }
+    .bottom { transform: rotateX(-90deg) translateZ(110px); }
+
+    .answer-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"] {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-right: 10px;
+      font-size: 16px;
+      width: 200px;
+      max-width: 70vw;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      background: #38bdf8;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    .clue {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      color: #38bdf8;
+      font-weight: bold;
+      display: none;
+    }
+
+    footer {
+      padding: 15px;
+      text-align: center;
+      background: transparent;
+    }
+
+    footer .hint {
+      font-size: clamp(14px, 4vw, 18px);
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      .scene { width: 180px; height: 180px; }
+      .face { width: 180px; height: 180px; font-size: 2rem; }
+      .front  { transform: rotateY(0deg) translateZ(90px); }
+      .back   { transform: rotateY(180deg) translateZ(90px); }
+      .right  { transform: rotateY(90deg) translateZ(90px); }
+      .left   { transform: rotateY(-90deg) translateZ(90px); }
+      .top    { transform: rotateX(90deg) translateZ(90px); }
+      .bottom { transform: rotateX(-90deg) translateZ(90px); }
+
+      input[type="text"] {
+        width: 180px;
+        font-size: 0.95rem;
+      }
+
+      button {
+        width: 100px;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Round 2 Cube Puzzle</h1>
+  </header>
+
+  <main>
+    <div class="scene" id="scene">
+      <div class="cube" id="cube">
+        <div class="face front">F</div>
+        <div class="face back">N</div>
+        <div class="face right">A</div>
+        <div class="face left">X</div>
+        <div class="face top">Y</div>
+        <div class="face bottom">Z</div>
+      </div>
+    </div>
+    <br><br><br>
+    <div class="answer-box">
+      <input type="text" id="answer" placeholder="Enter your answer">
+      <button onclick="checkAnswer()">Submit</button>
+    </div>
+
+    <div class="clue" id="clue">
+      ✅ Correct! Next clue:<br>🔑 Find the fan with the pink stick 🎀. Check under the systems where the numbers add up to 12.
+    </div>
+  </main>
+
+  <!-- <footer>
+    <div class="hint">
+      🔑 Find the fan with the pink stick 🎀. Check under the systems where the numbers add up to 12.
+    </div>
+  </footer> -->
+
+  <script>
+    const cube = document.getElementById("cube");
+    const scene = document.getElementById("scene");
+    let isDragging = false;
+    let startX, startY;
+    let currentX = -20, currentY = 20;
+
+    // 🖱 Mouse events
+    scene.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      scene.style.cursor = "grabbing";
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+      scene.style.cursor = "grab";
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        let deltaX = e.clientX - startX;
+        let deltaY = e.clientY - startY;
+        currentY += deltaX * 0.5;
+        currentX -= deltaY * 0.5;
+        cube.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
+        startX = e.clientX;
+        startY = e.clientY;
+      }
+    });
+
+    // 📱 Touch events
+    scene.addEventListener("touchstart", (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    });
+
+    scene.addEventListener("touchend", () => {
+      isDragging = false;
+    });
+
+    scene.addEventListener("touchmove", (e) => {
+      if (isDragging) {
+        let deltaX = e.touches[0].clientX - startX;
+        let deltaY = e.touches[0].clientY - startY;
+        currentY += deltaX * 0.5;
+        currentX -= deltaY * 0.5;
+        cube.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+    });
+
+    // ✅ Answer check
+    function checkAnswer() {
+      const input = document.getElementById("answer").value.trim().toLowerCase();
+      const clue = document.getElementById("clue");
+
+      if (input === "fan") {
+        clue.style.display = "block";
+      } else {
+        alert("❌ Wrong answer. Try again!");
+      }
+    }
+  </script>
+</body>
+</html>
